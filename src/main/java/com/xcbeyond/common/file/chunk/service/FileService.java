@@ -1,5 +1,7 @@
 package com.xcbeyond.common.file.chunk.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
  * @Date: 2019/5/9 23:01
  */
 public interface FileService {
+    void fileChunkUpload(long chunkId, MultipartFile multipartFile);
     /**
      * 文件分片下载
      * @param range

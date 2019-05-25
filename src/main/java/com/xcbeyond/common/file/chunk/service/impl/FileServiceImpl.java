@@ -2,13 +2,11 @@ package com.xcbeyond.common.file.chunk.service.impl;
 
 import com.xcbeyond.common.file.chunk.service.FileService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 /**
  * 文件分片操作Service
@@ -17,6 +15,39 @@ import java.io.RandomAccessFile;
  */
 @Service
 public class FileServiceImpl implements FileService {
+    //分片大小
+    private static final long chunkSize = 1024;
+    private static final String storePath = "";
+
+    public void fileChunkUpload(long chunkId, MultipartFile multipartFile) {
+        String path = storePath;
+        String fileName = multipartFile.getOriginalFilename();
+
+        String chunkFileName = fileName + ".chunk";
+        File chunkFile = new File(path, chunkFileName);
+        if (!chunkFile.exists()) {
+            chunkFile.getParentFile().mkdirs();
+        }
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(chunkFile, "rw");
+            //计算写入文件的偏移位置
+            long offset = (chunkId - 1) * chunkSize;
+            raf.seek(offset);
+            raf.write(multipartFile.getBytes());
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                raf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * 文件分片下载
@@ -110,7 +141,6 @@ public class FileServiceImpl implements FileService {
             outputStream.flush();
             response.flushBuffer();
             randomAccessFile.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
